@@ -1,0 +1,50 @@
+#! /usr/bin/env bash
+set -eu -o pipefail
+
+PROG="$( basename "$0" )"
+PDIR="$( cd "$( dirname "$0" )" && pwd )"
+
+if (( $# > 0 )) && [[ $1 =~ \'[-]+[Hh](elp)?\' ]]; then
+    cat >&2 <<-ENDHELP
+	usage: ${PROG} BRANCH-NAME
+	BRANCH-NAME:
+		The name of a new branch
+	ENDHELP
+    exit 2
+elif (( $# == 0 )); then
+    echo >&2 "${PROG}: missing branch name"
+    exit 1
+elif (( $# > 1 )); then
+    echo >&2 "${PROG}: only one branch name is accepted"
+    exit 1
+else
+    ## set -x
+    : "$( set -o noglob; echo ${1} )"
+    : "${_//[^-_[:alnum:]]/ }"
+    : "${_// /-}"
+    : "$( sed <<< "${_}" 's/__*/_/g' )"
+    : "$( sed <<< "${_}" 's/--*/-/g' )"
+    BRANCH=$_
+    ## set +x
+
+    if [[ ${BRANCH} =~ [^-_[:alnum:]] ]]; then
+        echo >&2 "${PROG}: branch name \"${BRANCH}\" is invalid"
+        exit 1
+    elif [[ $1 != "${BRANCH}" ]]; then
+        echo "${PROG}: branch name reduced to \"${BRANCH}\"..."
+    fi
+fi
+
+#
+
+if git branch \
+        | cut -c3- \
+        | grep --quiet --fixed-strings --line-regexp --regexp "${BRANCH}"; then
+    echo >&2 "${PROG}: branch \"${BRANCH}\" already exists"
+    exit 1
+fi
+
+git checkout -b "${BRANCH}"
+git push --set-upstream origin "${BRANCH}"
+
+#

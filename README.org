@@ -1,0 +1,19 @@
+#+TITLE: ReadMe
+#+SUBTITLE: Dotfiles
+#+AUTHOR: Michael R. Mauger
+
+#+DATE: [Tue Mar 11 21:00:02 EDT 2025]
+#+SPDX-License-Identifier: GPL-3.0-or-later
+
+#+STARTUP: showeverything inlineimages
+#+OPTIONS: toc:nil
+#+OPTIONS: ^:{}
+#+OPTIONS: num:nil
+
+* Dotfiles
+
+This repository contains my GNU/Linux configuration files for
+installation in the HOME folder of a user. The installation is done by
+cloning this repository and running the ~install.sh~ script found in it.
+
+
