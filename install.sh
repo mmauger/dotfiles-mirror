@@ -51,6 +51,14 @@ function link-file {  # file
 #
 
 cd "${PDIR}"
+
+tree -a \
+     -I ${PROG} \
+     -I .git \
+     -I .gitlab-ci.yml \
+     -I LICENSE \
+     -I README.org
+
 find . -type f -print | sed 's#^[.]/##' | while read -r FILE; do
     case ${FILE} in
         ${PROG})
