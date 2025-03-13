@@ -1,0 +1,105 @@
+#! /usr/bin/env bash
+set -eu -o pipefail
+
+PROG="$( basename "$0" )"
+PDIR="$( cd "$( dirname "$0" )" && pwd )"
+
+if (( $# > 0 )) && [[ $1 =~ \<[-]+[Hh](elp)?\> ]]; then
+    cat >&2 <<-ENDHELP
+	usage: ${PROG} [--machine|host MACHINE] [--login|user LOGIN] [--port|protocol PORT] [--comment|other OTHER] ...
+	where:
+	    --machine MACHINE
+	    --host MACHINE
+	        Match "machine" value
+	    --login LOGIN
+	    --login LOGIN
+	        Match "login" value
+	    --port PORT
+	    --protocol PORT
+	        Match "port" value
+	    --comment OTHER
+	    --other OTHER
+	        Match any comment text
+	ENDHELP
+    exit 2
+fi
+
+MATCH_MACHINE=
+MATCH_LOGIN=
+MATCH_PORT=
+MATCH_OTHER=
+
+while (( $# >= 2 )) && [[ $1 = --* ]]; do
+    case $1 in
+        --machine|--host)
+            MATCH_MACHINE=$2
+            shift 2
+            ;;
+        --login|--user)
+            MATCH_LOGIN=$2
+            shift 2
+            ;;
+        --port|--protocol)
+            MATCH_PORT=$2
+            shift 2
+            ;;
+        --comment|--protocol)
+            MATCH_OTHER=$2
+            shift 2
+            ;;
+        *)
+            echo >&2 "${PROG}: unrecognized option \"${1}\""
+            exit 3
+            ;;
+    esac
+done
+if (( $# > 0 )); then
+    echo >&2 "${PROG}: unrecognized remaining options \"${@}\""
+    exit 3
+fi
+
+function filter { # KEYWORD VALUE
+    local PATTERN
+    if (( $# == 2 )); then
+        if [[ $1 == '#' ]]; then
+            PATTERN=" [#] +${2}"
+        else
+            PATTERN="^[^#]*(${1}) +${2}"
+        fi
+        grep --extended-regexp --ignore-case --regexp "${PATTERN}"
+    else
+        cat
+    fi
+}
+
+function only_one_match {
+    read -r LINE
+    if read -r TOOMANY; then
+        echo >&2 "${PROG}: too many matches"
+        exit 1
+    else
+        echo "${LINE}"
+    fi
+}
+
+function select_password { #
+    awk '
+    {
+        gsub(/ *[#].*$/, "") # remove comment
+        for (i = 1; i <= NF; i += 2) {
+            if ($i == "password" ) {
+                print $(i + 1)
+            }
+        }
+    }'
+}
+
+gpg2 --for-your-eyes-only --quiet --decrypt ~/.authinfo.gpg \
+    | filter 'machine|host'  "${MATCH_MACHINE}" \
+    | filter 'login|user'    "${MATCH_LOGIN}" \
+    | filter 'port|protocol' "${MATCH_PORT}" \
+    | filter '#'             "${MATCH_OTHER}" \
+    | only_one_match \
+    | select_password
+
+#
