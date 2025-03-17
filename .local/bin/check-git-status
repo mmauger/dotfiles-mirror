@@ -1,0 +1,27 @@
+#! /usr/bin/env bash
+set -eu -o pipefail
+
+PROG="$( basename "$0" )"
+PDIR="$( cd "$( dirname "$0" )" && pwd )"
+
+if (( $# > 0 )) && [[ $1 =~ \'[-]+[Hh](elp)?\' ]]; then
+    cat >&2 <<-ENDHELP
+	usage: ${PROG} ...
+	ENDHELP
+    exit 2
+fi
+
+#
+
+ON=$( tput smul )
+OFF=$( tput rmul )
+
+cd ~/Projects
+for p in */.git; do
+    proj=$( dirname "$p" )
+    echo '* ' "${ON}${proj#*/}${OFF}"
+    git -C "${proj}" status --short
+    echo
+done
+
+#
