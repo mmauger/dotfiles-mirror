@@ -2,6 +2,7 @@
 set -eu -o pipefail
 
 PROG="$( basename "$0" )"
+# shellcheck disable=SC2034
 PDIR="$( cd "$( dirname "$0" )" && pwd )"
 
 if (( $# > 0 )) && [[ $1 =~ \'[-]+[Hh](elp)?\' ]]; then
@@ -11,18 +12,24 @@ if (( $# > 0 )) && [[ $1 =~ \'[-]+[Hh](elp)?\' ]]; then
 		The name of a new branch
 	ENDHELP
     exit 2
+
 elif (( $# == 0 )); then
     echo >&2 "${PROG}: missing branch name"
     exit 1
+
 elif (( $# > 1 )); then
     echo >&2 "${PROG}: only one branch name is accepted"
     exit 1
+
 else
     ## set -x
+    # shellcheck disable=SC2086
     : "$( set -o noglob; echo ${1} )"
     : "${_//[^-_[:alnum:]]/ }"
     : "${_// /-}"
+    # shellcheck disable=SC2001
     : "$( sed <<< "${_}" 's/__*/_/g' )"
+    # shellcheck disable=SC2001
     : "$( sed <<< "${_}" 's/--*/-/g' )"
     BRANCH=$_
     ## set +x
@@ -38,7 +45,7 @@ fi
 #
 
 if git branch \
-        | cut -c3- \
+        | cut --characters 3- \
         | grep --quiet --fixed-strings --line-regexp --regexp "${BRANCH}"; then
     echo >&2 "${PROG}: branch \"${BRANCH}\" already exists"
     exit 1
