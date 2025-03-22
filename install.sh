@@ -19,16 +19,20 @@ fi
 
 function link-file {  # file
     local -x FILEPATH=$1
-    local DIR=$( dirname "${FILEPATH}" )
-    local FILE=$( basename "${FILEPATH}" )
+    local DIR FILE
+    DIR=$( dirname "${FILEPATH}" )
+    FILE=$( basename "${FILEPATH}" )
 
     local -x SRC="${PDIR}/${FILEPATH}"
-    local RSRC=$( realpath --canonicalize-missing "${SRC}" )
+    local RSRC
+    RSRC=$( realpath --canonicalize-missing "${SRC}" )
     local -x DST="${HOME}/${FILEPATH}"
-    local DDST=$( sed <<< "${DST}" "s#^${HOME}#~#" )
-    local RDST=$( realpath --canonicalize-missing "${DST}" )
+    local DDST RDST
+    # shellcheck disable=SC2001
+    DDST=$( sed <<< "${DST}" "s#^${HOME}#~#" )
+    RDST=$( realpath --canonicalize-missing "${DST}" )
 
-    echo >&2 '===[' "${DDST}" ']===================='
+    echo >&2 ; echo >&2 '===[' "${DDST}" ']===================='
 
     if [[ -e ${SRC} ]]; then
         if [[ -e ${DST} ]]; then
@@ -36,7 +40,7 @@ function link-file {  # file
                 echo >&2 "${PROG}: file \"${FILEPATH}\" already installed"
             else
                 echo >&2 "${PROG}: Destination file \"${DDST}\" is not a link to the source file"
-                git diff --stat "${FILEPATH}" "${RDST}"
+                ( diff "${FILEPATH}" "${RDST}" | diffstat -s ) || true
             fi
         else
             mkdir --parents "$( dirname "${DST}" )"
@@ -44,7 +48,7 @@ function link-file {  # file
         fi
     else
         echo >&2 "${PROG}: Source file \"${FILEPATH}\" does not exist"
-        exit 1
+        return 1
     fi
 }
 
@@ -53,14 +57,14 @@ function link-file {  # file
 cd "${PDIR}"
 
 tree -a \
-     -I ${PROG} \
+     -I "${PROG}" \
      -I .git \
      -I LICENSE \
      -I README.org
 
 find . -type f -print | sed 's#^[.]/##' | while read -r FILE; do
     case ${FILE} in
-        ${PROG})
+        "${PROG}")
             ;;
         .git/*)
             ;;
