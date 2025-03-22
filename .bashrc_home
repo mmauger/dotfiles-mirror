@@ -1,0 +1,21 @@
+# .bashrc_home   -*- shell-script -*-
+
+# ~/.bashrc_home
+
+# SystemD control
+alias usys='systemctl --user '
+alias ujnl='journalctl --user --pager-end --unit '
+
+# Guile/Scheme
+if [[ -z $( type -t guile ) ]]; then
+    if [[ $( type -t guile3.0 ) == file ]]; then
+        alias guile=$( type -p guile3.0 )
+    elif [[ $( type -t guile2.2 ) == file ]]; then
+        alias guile=$( type -p guile2.2 )
+    fi
+fi
+
+# Update installed packages
+alias pkgup='sudo dnf --refresh -y update '
+
+#
