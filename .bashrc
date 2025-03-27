@@ -1,4 +1,5 @@
 # .bashrc   -*- shell-script -*-
+# shellcheck disable=SC1090
 
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
@@ -59,6 +60,7 @@ else
 fi
 unset color_prompt force_color_prompt
 
+# Set our shell prompt
 if [[ -x ~/.local/bin/my-prompt-command.sh ]]; then
     __my_prompt_command () { PS1=$( ~/.local/bin/my-prompt-command.sh "$?" ); }
     PROMPT_COMMAND=( __my_prompt_command )
@@ -70,7 +72,7 @@ shopt -s globstar extglob
 
 # Email
 case $( hostname -d ) in
-    "" | *mauger* )
+    "" | *mauger* | *michael* )
         EMAIL='michael@mauger.com'
         ;;
     *)
@@ -79,35 +81,47 @@ case $( hostname -d ) in
 esac
 export EMAIL
 
-#
-
-# Handle location specific config
-if [[ ${MY_LOCATION} ]]; then
-    if [[ -f ~/.bashrc_${MY_LOCATION} ]]; then
-        . ~/.bashrc_${MY_LOCATION}
-    fi
-fi
-
 # Function definitions.
-
 if [ -f ~/.bash_functions ]; then
-    . ~/.bash_functions
+    # shellcheck disable=SC1091
+    source ~/.bash_functions
 fi
 
 # Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
 if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
+    # shellcheck disable=SC1091
+    source ~/.bash_aliases
+fi
+
+# Set PATH
+clean_path
+add_path ~/go/bin
+add_path ~/bin
+add_path ~/.local/bin
+
+# Set things for the location
+if [[ ${MY_LOCATION} ]]; then
+    if [[ -f ~/.bashrc_${MY_LOCATION} ]]; then
+        source ~/.bashrc_"${MY_LOCATION}"
+    fi
+
+    if [[ -f ~/.bash_aliases_${MY_LOCATION} ]]; then
+        # shellcheck disable=SC1091
+        source ~/.bash_aliases_"${MY_LOCATION}"
+    fi
+
+    if [[ -f ~/.bash_functions_${MY_LOCATION} ]]; then
+        # shellcheck disable=SC1091
+        source ~/.bash_functions_"${MY_LOCATION}"
+    fi
 fi
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-    . /etc/bash_completion
+    # shellcheck disable=SC1091
+    source /etc/bash_completion
 fi
 
 #
