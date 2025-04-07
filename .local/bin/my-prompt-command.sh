@@ -1,4 +1,6 @@
-# sourced file   -*- shell-script -*-
+# sourced file   -*- shell-script; sh-shell: bash -*-
+# shellcheck shell=bash
+
 # In ~/.bashrc
 #   __my_prompt_command () { PS1=$( source ~/my-config/prompt.sh "$?" ); }
 #   PROMPT_COMMAND=( __my_prompt_command )
@@ -25,13 +27,13 @@ esac
 WHO="${GREEN}${WHONAME}${NORMAL}"
 
 # working directory
-: ${PWD}
-: ${_#${HOME}/Projects/}
-: ${_#${HOME}/Project/}
-: ${_#${HOME}/Development/}
-: ${_#${HOME}/Develop/}
+: "${PWD}"
+: "${_#"${HOME}/Projects/"}"
+: "${_#"${HOME}/Project/"}"
+: "${_#"${HOME}/Development/"}"
+: "${_#"${HOME}/Develop/"}"
 PROJECT=$_
-if [[ ${PROJECT} == ${PWD} ]];then
+if [[ ${PROJECT} == "${PWD}" ]];then
     PROJECT='\w'
 fi
 WHERE="  ${YELLOW}${PROJECT}${NORMAL}"
@@ -60,6 +62,6 @@ else
 fi
 
 # return our new prompt string
-echo $"\n╭╴${WHO}${WHERE}${WHAT}${VENV}\n╰╴${ERR}\$ "
+printf "\n╭╴%s%s%s%s\n╰╴%s\$ " "${WHO}" "${WHERE}" "${WHAT}" "${VENV}" "${ERR}"
 
 #
