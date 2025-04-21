@@ -1,0 +1,54 @@
+# ~/.gitconfig
+
+[user]
+	email = michael@mauger.com
+	name = Michael R. Mauger
+[gitlab]
+	user = mmauger
+[github]
+	user = mmauger
+
+[core]
+	editor = emacsclient -a ''
+	# whitespace = trailing-space,space-before-tab,indent-with-non-tab,tab-in-indent,cr-at-eol
+
+[help]
+	autocorrect = 30
+
+[color]
+	ui = always
+	diff = auto
+	status = always
+	branch = auto
+
+[push]
+	autoSetupRemote = true
+
+[pull]
+	rebase = true
+
+[rebase]
+	autoStash = true
+
+[diff]
+	tool = ediff
+	guitool = ediff
+
+[difftool "ediff"]
+	cmd = ~/.local/bin/git--ediff.sh "${LOCAL}" "${REMOTE}" "${MERGED}"
+
+[merge]
+	tool = ediff
+	autoStash = true
+
+[mergetool "ediff"]
+	cmd =  ~/.local/bin/git--ediff.sh "${LOCAL}" "${REMOTE}" "${MERGED}" "${BASE}"
+	trustExitCode = true
+
+[alias]
+	st = status --branch --show-stash
+	co = checkout
+	go = checkout
+	home = checkout main
+	logline = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	l = log --oneline
