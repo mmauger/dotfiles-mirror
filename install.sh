@@ -34,27 +34,37 @@ function link-file { # path/name
     local SRC="${PDIR}/${PATHFILE}"
     local DST="${HOME}/${PATHFILE}"
 
+    if [[ ${PATHFILE} == parent/* ]]; then
+        DST="${PDIR}/../${PATHFILE}"
+    fi
+
     if [[ -e "${SRC}" ]]; then
         if [[ -L "${DST}" ]]; then
-            if ! [[ "${SRC}" -ef "${DST}" ]]; then
-                echo >&2 "${PROG}: ${PATHFILE} is a link but to a different file"
-                ls -l "${DST}"
-                ( diff --ignore-all-space "${SRC}" "${DST}" | diffstat -s ) || true
+            if [[ -e "${DST}" ]]; then
+                if ! [[ "${SRC}" -ef "${DST}" ]]; then
+                    echo >&2 "${PROG}: ${PATHFILE} is a link but to a different file"
+                    ls -lA "${DST}" || true
+                    ( diff --ignore-all-space "${SRC}" "${DST}" | diffstat -s ) || true
 
-                if ${DO_FORCE}; then
-                    ln --symbolic --backup --verbose "${SRC}" "${DST}"
+                    if ${DO_FORCE}; then
+                        ln --symbolic --backup --verbose "${SRC}" "${DST}"
+                    fi
+
+                else
+                    # file is already linked; do nothing unless --force
+                    if ${DO_FORCE}; then
+                        ln --symbolic --backup --verbose "${SRC}" "${DST}"
+                    fi
                 fi
 
             else
-                # file is already linked; do nothing unless --force
-                if ${DO_FORCE}; then
-                    ln --symbolic --backup --verbose "${SRC}" "${DST}"
-                fi
+                # file is a link to non-existing file
+                ln --symbolic --backup --verbose "${SRC}" "${DST}"
             fi
 
         elif [[ -e "${DST}" ]]; then
             echo >&2 "${PROG}: ${PATHFILE} is not a link"
-            ls -l "${DST}"
+            ls -lA "${DST}" || true
             ( diff --ignore-all-space "${SRC}" "${DST}" | diffstat -s ) || true
 
             if ${DO_FORCE}; then
