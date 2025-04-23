@@ -58,7 +58,7 @@ function link-file { # path/name
                 fi
 
             else
-                # file is a link to non-existing file
+                # the file is linked but the file it is linked to doesn't exist
                 ln --symbolic --backup --verbose "${SRC}" "${DST}"
             fi
 
@@ -89,13 +89,15 @@ function set-prot { # DIR
 
 #
 
+REPO=${PDIR##*/}
 cd "${PDIR}"
 
 tree -a \
      -I "${PROG}" \
      -I .git \
      -I LICENSE \
-     -I README.org
+     -I README.org \
+     -I "${REPO}.png"
 echo
 
 find . -maxdepth 1 -type f -name .\*    -exec chmod --changes 644 \{\} +
@@ -136,6 +138,9 @@ done
 find . -type f -print | sed 's#^[.]/##' | while read -r FILE; do
     case ${FILE} in
         "${PROG}" | .git/* | README* | LICENSE*)
+            # Skip. Do nothing
+            ;;
+        "${REPO}.png")
             # Skip. Do nothing
             ;;
         *)
