@@ -77,13 +77,15 @@ function link-file { # path/name
     fi
 }
 
-function set-prot { # DIR
+function mk-and-chmod-install { # DIR
     local DIR=$1
     local SRCDIR="${PDIR}/${DIR}"
     local DSTDIR="${HOME}/${DIR}"
     MODE=$( stat --format=%a "${SRCDIR}" )
 
-    [[ -d "${DSTDIR}" ]] || mkdir --verbose "${DSTDIR}"
+    if ! [[ -d "${DSTDIR}" ]]; then
+        mkdir --verbose "${DSTDIR}"
+    fi
     chmod --changes "${MODE}" "${DSTDIR}"
 }
 
@@ -99,6 +101,8 @@ tree -a \
      -I README.org \
      -I "${REPO}.png"
 echo
+
+# Set chmod for repo tree
 
 find . -maxdepth 1 -type f -name .\*    -exec chmod --changes 644 \{\} +
 
@@ -124,23 +128,24 @@ if [[ -d .local ]]; then
     fi
 fi
 
+# Make and chmod folders in installation
+
 find . -type d -print | sed 's#^[.]/##' | while read -r DIR; do
     case ${DIR} in
-        "${PROG}" | .git* | README* | LICENSE*)
+        .git | .git/*)
             # Skip. Do nothing
             ;;
         *)
-            set-prot "${DIR}"
+            mk-and-chmod-install "${DIR}"
             ;;
     esac
 done
 
+# Link installation files to the repo
+
 find . -type f -print | sed 's#^[.]/##' | while read -r FILE; do
     case ${FILE} in
-        "${PROG}" | .git/* | README* | LICENSE*)
-            # Skip. Do nothing
-            ;;
-        "${REPO}.png")
+        "${PROG}" | .git/* | README.org | LICENSE | "${REPO}.png")
             # Skip. Do nothing
             ;;
         *)
