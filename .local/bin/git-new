@@ -52,6 +52,10 @@ if git branch \
 fi
 
 git checkout -b "${BRANCH}"
-git push --set-upstream origin "${BRANCH}"
+
+# # [push]
+# # autoSetupRemote = true
+# # in .gitconfig should do this automatically
+# git push --set-upstream origin "${BRANCH}"
 
 #

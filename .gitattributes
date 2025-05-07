@@ -1,0 +1,17 @@
+# .gitattributes
+#
+# Based on https://github.com/jamescherti/jc-dotfiles/blob/main/.gitattributes_global
+#
+
+# Ensure bash scripts use LF line endings
+*.sh text eol=lf
+
+# Hooks for non-default diff hunk headers
+*.ac diff=m4
+*.el diff=elisp
+*.m4 diff=m4
+*.mk diff=make
+*[Mm]akefile diff=make
+Makefile.in diff=make
+*.texi diff=texinfo
+*[-.]sh diff=shell
