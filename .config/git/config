@@ -11,6 +11,7 @@
 [core]
 	editor = emacsclient -a ''
 	# whitespace = trailing-space,space-before-tab,indent-with-non-tab,tab-in-indent,cr-at-eol
+	whitespace = trailing-space, space-before-tab
 
 [help]
 	autocorrect = 30
@@ -34,6 +35,8 @@
 	tool = ediff
 	guitool = ediff
 
+[difftool]
+	prompt = false
 [difftool "ediff"]
 	cmd = ~/.local/bin/git--ediff.sh "${LOCAL}" "${REMOTE}" "${MERGED}"
 
@@ -42,22 +45,22 @@
 # than showing the entire function as modified, which improves the clarity of
 # code reviews and merges in Emacs Lisp code.
 [diff "elisp"]
-      xfuncname = ^\\([^[:space:]]*\\(cl-\\)?)def[^[:space:]]+[[:space:]]+([^()[:space:]]+)
+	xfuncname = ^\\([^[:space:]]*\\(cl-\\)?)def[^[:space:]]+[[:space:]]+([^()[:space:]]+)
 
 [diff "cpp"]
-      xfuncname = "!^[ \\t]*[A-Za-z_][A-Za-z_0-9]*:[[:space:]]*($|/[/*])\n^((::[[:space:]]*)?[A-Za-z_][A-Za-z_0-9]*[[:space:]]*\\(.*)$\n^((#define[[:space:]]|DEFUN).*)$"
+	xfuncname = "!^[ \\t]*[A-Za-z_][A-Za-z_0-9]*:[[:space:]]*($|/[/*])\n^((::[[:space:]]*)?[A-Za-z_][A-Za-z_0-9]*[[:space:]]*\\(.*)$\n^((#define[[:space:]]|DEFUN).*)$"
 
 [diff "m4"]
-      xfuncname = ^((m4_)?define|A._DEFUN(_ONCE)?)\\([^),]*
+	xfuncname = ^((m4_)?define|A._DEFUN(_ONCE)?)\\([^),]*
 
 [diff "make"]
-      xfuncname = ^([$.[:alnum:]_].*:|[[:alnum:]_]+[[:space:]]*([*:+]?[:?]?|!?)=|define .*)
+	xfuncname = ^([$.[:alnum:]_].*:|[[:alnum:]_]+[[:space:]]*([*:+]?[:?]?|!?)=|define .*)
 
 [diff "shell"]
-      xfuncname = ^([[:space:]]*[[:alpha:]_][[:alnum:]_]*[[:space:]]*\\(\\)|[[:alpha:]_][[:alnum:]_]*=)
+	xfuncname = ^([[:space:]]*[[:alpha:]_][[:alnum:]_]*[[:space:]]*\\(\\)|[[:alpha:]_][[:alnum:]_]*=)
 
 [diff "texinfo"]
-      xfuncname = ^@node[[:space:]]+([^,[:space:]][^,]+)
+	xfuncname = ^@node[[:space:]]+([^,[:space:]][^,]+)
 
 [merge]
 	tool = ediff
@@ -68,7 +71,7 @@
 	trustExitCode = true
 
 [alias]
-        up = pull --rebase --autostash
+	up = pull --rebase --autostash
 	st = status --branch --show-stash
 	co = checkout
 	go = checkout
