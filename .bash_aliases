@@ -2,20 +2,20 @@
 
 # enable color support of ls and also add handy aliases
 if [[ $- = *i* ]]; then
-    if [ -x /usr/bin/dircolors ]; then
+    if type -p dircolors &>/dev/null; then
         if [[ -r ~/.dircolors ]]; then
-            eval $(TERM=ansi dircolors -b ~/.dircolors)
+            eval $( sort ~/.dircolors | TERM=ansi dircolors --sh )
         else
-            eval $(TERM=ansi dircolors -b)
+            eval $( TERM=ansi dircolors --sh )
         fi
 
-        alias ls='ls --color=auto'
-        alias dir='dir --color=auto'
-        alias vdir='vdir --color=auto'
+        alias ls='ls --color=auto '
+        alias dir='dir --color=auto '
+        alias vdir='vdir --color=auto '
 
-        alias grep='grep --color=auto'
-        alias fgrep='fgrep --color=auto'
-        alias egrep='egrep --color=auto'
+        alias grep='grep --color=auto '
+        alias fgrep='fgrep --color=auto '
+        alias egrep='egrep --color=auto '
     fi
 fi
 
