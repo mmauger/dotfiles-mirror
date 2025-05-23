@@ -4,7 +4,7 @@
 
 ## CLEAN_PATH
 
-function clean_path { #
+clean_path () { #
     local oldpath
     mapfile -t oldpath <<< "${PATH//:/$'\n'}"
     local newpath=':'
@@ -22,7 +22,7 @@ declare -x clean_path
 
 ## ADD_PATH
 
-function add_path { # ENTRY [--before|--after|--prepend|--append]
+add_path () { # ENTRY [--before|--after|--prepend|--append]
     local entry
     local prepend=true
 
@@ -57,7 +57,7 @@ declare -x add_path
 
 ## REM_PATH
 
-function rem_path { # ENTRY
+rem_path () { # ENTRY
     local entry=${1%/}
     local path=":${PATH}:"
 
