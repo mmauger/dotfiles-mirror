@@ -6,7 +6,12 @@
 
 clean_path () { #
     local oldpath
-    mapfile -t oldpath <<< "${PATH//:/$'\n'}"
+    # mapfile -t oldpath <<< "${PATH//:/$'\n'}"
+    mapfile -d : -t oldpath <<< "${PATH}"
+    local i
+    for (( i = 0; i < ${#oldpath[*]}; ++i )); do
+        oldpath[i]=${oldpath[i]%$'\n'}
+    done
     local newpath=':'
     for p in "${oldpath[@]}"; do
         if [[ ${newpath} =~ :${p}: ]]; then
@@ -62,6 +67,7 @@ rem_path () { # ENTRY
     local path=":${PATH}:"
 
     : "${path//:${entry}:/:}"
+    # spellcheck disable=SC2001
     : "$( sed 's/::*/:/g' <<< "${_}" )"
     : "${_##:}"
     : "${_%%:}"

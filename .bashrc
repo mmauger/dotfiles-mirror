@@ -1,5 +1,4 @@
 # .bashrc   -*- shell-script -*-
-# shellcheck disable=SC1090
 
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
@@ -27,9 +26,7 @@ shopt -s checkwinsize
 #[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 unset LESSOPEN LESSCLOSE
 
-# uncomment for a colored prompt, if the terminal has the capability; turned
-# off by default to not distract the user: the focus in a terminal window
-# should be on the output of commands, not on the prompt
+# set true for a colored prompt, if the terminal has the capability
 force_color_prompt=true
 
 # set a fancy prompt (non-color, unless we know we "want" color)
@@ -68,7 +65,7 @@ else
     unset PROMPT_COMMAND
 fi
 
-shopt -s globstar extglob
+shopt -s globstar extglob nullglob
 
 # Email
 case $( hostname -d ) in
@@ -83,13 +80,13 @@ export EMAIL
 
 # Function definitions.
 if [ -f ~/.bash_functions ]; then
-    # shellcheck disable=SC1091
+    # shellcheck source=.bash_functions
     source ~/.bash_functions
 fi
 
 # Alias definitions.
 if [ -f ~/.bash_aliases ]; then
-    # shellcheck disable=SC1091
+    # shellcheck source=.bash_aliases
     source ~/.bash_aliases
 fi
 
@@ -102,16 +99,17 @@ add_path ~/.local/bin
 # Set things for the location
 if [[ ${MY_LOCATION} ]]; then
     if [[ -f ~/.bashrc_${MY_LOCATION} ]]; then
+        # shellcheck source=/dev/null
         source ~/.bashrc_"${MY_LOCATION}"
     fi
 
     if [[ -f ~/.bash_aliases_${MY_LOCATION} ]]; then
-        # shellcheck disable=SC1091
+        # shellcheck source=/dev/null
         source ~/.bash_aliases_"${MY_LOCATION}"
     fi
 
     if [[ -f ~/.bash_functions_${MY_LOCATION} ]]; then
-        # shellcheck disable=SC1091
+        # shellcheck source=/dev/null
         source ~/.bash_functions_"${MY_LOCATION}"
     fi
 fi
@@ -120,7 +118,7 @@ fi
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-    # shellcheck disable=SC1091
+    # shellcheck source=/dev/null
     source /etc/bash_completion
 fi
 
