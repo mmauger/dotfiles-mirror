@@ -26,6 +26,7 @@ fi
 alias ll='ls -AlhG --color=auto --group-directories-first --file-type '  # including -B hides ~ backups
 alias la='ls -A --file-type '
 alias l='ls -C --file-type '
+complete -o default ll la l
 
 if [[ -n $WAYLAND_DISPLAY ]]; then
     alias open='xdg-open '
@@ -46,11 +47,13 @@ fi
 export ALTERNATE_EDITOR=
 if [[ -z $( type -t e ) ]]; then
     alias e='emacsclient --create-frame '
+    complete -o default e
 fi
 export EDITOR=e
 if [[ -z ${INSIDE_EMACS} ]]; then
     alias ee='emacs --quick --no-window-system --eval "(set-variable '"'"'frame-background-mode '"'"'dark)"'
     alias ekill='emacsclient --alternate-editor false --tty --eval \(save-buffers-kill-emacs\) '
+    complete -o default ee
 fi
 
 alias cp='cp -i '
