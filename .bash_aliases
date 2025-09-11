@@ -4,14 +4,17 @@
 if [[ $- = *i* ]]; then
     if type -p dircolors &>/dev/null; then
         if [[ -r ~/.dircolors ]]; then
-            eval $( sort ~/.dircolors | TERM=ansi dircolors --sh )
+            # spellcheck disable=SC2046
+            eval "$( dircolors --sh <( sort ~/.dircolors ) )"
         else
-            eval $( TERM=ansi dircolors --sh )
+            # spellcheck disable=SC2046
+            eval "$( TERM=ansi dircolors --sh )"
         fi
 
         alias ls='ls --color=auto '
         alias dir='dir --color=auto '
         alias vdir='vdir --color=auto '
+        alias tree='tree -a -I .git --prune --gitignore -C --dirsfirst '
 
         alias grep='grep --color=auto '
         alias fgrep='fgrep --color=auto '
@@ -24,9 +27,20 @@ alias ll='ls -AlhG --color=auto --group-directories-first --file-type '  # inclu
 alias la='ls -A --file-type '
 alias l='ls -C --file-type '
 
-alias open='xdg-open '
-alias pbcopy='xsel --clipboard --input '
-alias pbpaste='xsel --clipboard --output '
+if [[ -n $WAYLAND_DISPLAY ]]; then
+    alias open='xdg-open '
+    alias pbcopy='wl-copy '
+    alias pbpaste='wl-paste '
+elif [[ -n $DISPLAY ]]; then
+    alias open='xdg-open '
+    alias pbcopy='xsel --clipboard --input '
+    alias pbpaste='xsel --clipboard --output '
+elif [[ $( uname ) == Darwin ]]; then
+    # open
+    # pbcopy
+    # pbpaste
+    :
+fi
 
 # Emacs
 export ALTERNATE_EDITOR=
@@ -42,5 +56,9 @@ fi
 alias cp='cp -i '
 alias mv='mv -i '
 alias rm='rm -i '
+
+alias ..='cd ../'
+alias ...='cd ../../'
+alias ....='cd ../../../'
 
 #
