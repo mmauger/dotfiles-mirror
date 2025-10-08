@@ -43,7 +43,7 @@ while (( $# >= 2 )) && [[ $1 = --* ]]; do
             MATCH_PORT=$2
             shift 2
             ;;
-        --comment|--protocol)
+        --comment)
             MATCH_OTHER=$2
             shift 2
             ;;
@@ -54,7 +54,7 @@ while (( $# >= 2 )) && [[ $1 = --* ]]; do
     esac
 done
 if (( $# > 0 )); then
-    echo >&2 "${PROG}: unrecognized remaining options \"${@}\""
+    echo >&2 "${PROG}: unrecognized remaining options" "${@}"
     exit 3
 fi
 
@@ -73,9 +73,10 @@ function filter { # KEYWORD VALUE
 }
 
 function only_one_match {
+    local LINE TOOMANY
     read -r LINE
     if read -r TOOMANY; then
-        echo >&2 "${PROG}: too many matches"
+        echo >&2 "${PROG}: too many matches" "${TOOMANY}"
         exit 1
     else
         echo "${LINE}"
