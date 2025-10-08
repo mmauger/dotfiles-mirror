@@ -17,5 +17,6 @@ fi
 
 # Update installed packages
 alias pkgup='sudo dnf --refresh -y update '
+alias pkgwhat='dnf --refresh update --assumeno '
 
 #
