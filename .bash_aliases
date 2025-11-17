@@ -44,24 +44,20 @@ elif [[ $( uname ) == Darwin ]]; then
 fi
 
 # Emacs
-export ALTERNATE_EDITOR=
-if [[ -z $( type -t e ) ]]; then
-    alias e='emacsclient --create-frame '
-    complete -o default e
-fi
-export EDITOR=e
+export EDITOR='emacsclient --create-frame '
 if [[ -z ${INSIDE_EMACS} ]]; then
     alias ee='emacs --quick --no-window-system --eval "(set-variable '"'"'frame-background-mode '"'"'dark)"'
     alias ekill='emacsclient --alternate-editor false --tty --eval \(save-buffers-kill-emacs\) '
     complete -o default ee
 fi
+export ALTERNATE_EDITOR=
+if [[ -z $( type -t e ) ]]; then
+    alias e="${EDITOR}"
+    complete -o default e
+fi
 
 alias cp='cp -i '
 alias mv='mv -i '
 alias rm='rm -i '
-
-alias ..='cd ../'
-alias ...='cd ../../'
-alias ....='cd ../../../'
 
 #
