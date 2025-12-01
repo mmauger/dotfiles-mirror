@@ -48,8 +48,10 @@ WHO="${GREEN}${WHONAME}${NORM}"
 : "${PWD}"
 : "${_#"${HOME}/Projects/"}"
 : "${_#"${HOME}/Project/"}"
+: "${_#"${HOME}/Proj/"}"
 : "${_#"${HOME}/Development/"}"
 : "${_#"${HOME}/Develop/"}"
+: "${_#"${HOME}/Devel/"}"
 PROJECT=$_
 if [[ ${PROJECT} == "${PWD}" ]];then
     PROJECT='\w'
