@@ -65,7 +65,7 @@ else
     unset PROMPT_COMMAND
 fi
 
-shopt -s globstar extglob nullglob
+shopt -s globstar extglob # nullglob
 
 # Email
 case $( hostname -d ) in
