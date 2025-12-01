@@ -1,0 +1,91 @@
+#! /usr/bin/env bash
+set -eu -o pipefail
+
+PROG="$( basename "$0" )"
+PDIR="$( cd "$( dirname "$0" )" && pwd )"
+
+DO_ALL=false
+declare -a REPO_LIST
+if (( $# > 0 )) && [[ $1 =~ \'[-]+[Hh](elp)?\' ]]; then
+    cat >&2 <<-ENDHELP
+	usage: ${PROG} [--all | repo-name ]
+	option:
+	    --all: Summarize status of all repositories
+        repo-name:
+            List short details of repository
+	ENDHELP
+    exit 2
+
+elif (( $# == 1 )) && [[ $1 == --all || $1 == -a ]]; then
+    DO_ALL=true
+
+elif (( $# == 0 )); then
+    DO_ALL=true
+
+elif (( $# > 0 )); then
+    REPO_LIST=( "$@" )
+
+else
+    echo >&2 "${PROG}: unknown command-line arguments: %*"
+    exit 1
+fi
+
+ON=$( tput smul || true )       # Start underline
+OFF=$( tput rmul || true )      # Remove underline
+HLON=$( tput setaf 1 || true )  # Start red
+HLOFF=$( tput sgr0 || true )    # Remove color
+
+#
+function git-status-details { # dir [flags]
+    local repo=$1; shift
+    git -C "${repo}" status --short --ignored=no "$@"
+}
+
+function git-status-summary { # dir [flags]
+    local repo=$1; shift
+    git -C "${repo}" status --porcelain  --ignored=no "$@" \
+        | cut -c1,2 | sed 's/ /-/g' \
+        | sort | uniq -c \
+        | awk -v "HLON=${HLON}" -v "HLOFF=${HLOFF}" \
+              '{  gsub (/-/, " ", $2)
+                  print "  " HLON $2 HLOFF ": " $1
+               }'
+}
+
+function projects-dir {
+    find ~ \
+         -maxdepth 1 \
+         -type d \
+         \( -iname 'Projects' \
+         -o -iname 'Project' \
+         -o -iname 'Proj' \
+         -o -iname 'Development' \
+         -o -iname 'Develop' \
+         -o -iname 'Devel' \
+         \) -print \
+        | head -1
+}
+
+cd "$( projects-dir )"
+
+if $DO_ALL; then
+    find . -type d -name .git -print | while read -r p; do
+        proj="$( dirname "${p#./}" )"
+        n_changes=$( git-status-summary "${proj}" --untracked-files=no | wc -l )
+        if (( n_changes > 0 )); then
+            echo '*' "${ON}${proj}${OFF}"
+            git-status-details "${proj}"
+            echo
+        fi
+    done
+else
+    for proj in "${REPO_LIST[@]}"; do
+        if [[ -d ${proj}/.git ]]; then
+            echo '*' "${ON}${proj}${OFF}"
+            git-status-summary "${proj}" --untracked-files=no
+            echo
+        fi
+    done
+fi
+
+#
