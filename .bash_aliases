@@ -48,6 +48,7 @@ export EDITOR='emacsclient --create-frame '
 if [[ -z ${INSIDE_EMACS} ]]; then
     alias ee='emacs --quick --no-window-system --eval "(set-variable '"'"'frame-background-mode '"'"'dark)"'
     alias ekill='emacsclient --alternate-editor false --tty --eval \(save-buffers-kill-emacs\) '
+    alias eproc='pgrep -a emacs'
     complete -o default ee
 fi
 export ALTERNATE_EDITOR=

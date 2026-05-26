@@ -16,7 +16,7 @@ if [[ -z $( type -t guile ) ]]; then
 fi
 
 # Update installed packages
-alias pkgup='sudo dnf --refresh -y update '
+alias pkgup='sudo dnf --refresh -y update && fwupdmgr refresh --force && fwupdmgr update && flatpak update'
 alias pkgwhat='dnf --refresh update --assumeno '
 
 #
