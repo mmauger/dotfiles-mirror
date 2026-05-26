@@ -28,12 +28,19 @@
 [pull]
 	rebase = true
 
+[fetch]
+	prune = true
+
 [rebase]
 	autoStash = true
+
+[branch "main"]
+	rebase = true
 
 [diff]
 	tool = ediff
 	guitool = ediff
+	algorithm = histogram
 
 [difftool]
 	prompt = false
@@ -78,5 +85,6 @@
 	home = checkout main
 	logline = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 	l = log --oneline
+
 [init]
 	defaultBranch = main
