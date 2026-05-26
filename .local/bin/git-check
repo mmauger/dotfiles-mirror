@@ -2,6 +2,7 @@
 set -eu -o pipefail
 
 PROG="$( basename "$0" )"
+# shellcheck disable=SC2034
 PDIR="$( cd "$( dirname "$0" )" && pwd )"
 
 DO_ALL=false
@@ -22,7 +23,7 @@ elif (( $# == 1 )) && [[ $1 == --all || $1 == -a ]]; then
 elif (( $# == 0 )); then
     DO_ALL=true
 
-elif (( $# > 0 )); then
+elif (( $# > 0 )) && ! [[ $1 =~ ^- ]]; then
     REPO_LIST=( "$@" )
 
 else
@@ -38,7 +39,10 @@ HLOFF=$( tput sgr0 || true )    # Remove color
 #
 function git-status-details { # dir [flags]
     local repo=$1; shift
-    git -C "${repo}" status --short --ignored=no "$@"
+    COLUMNS=80 git -C "${repo}" diff --stat -B -M -C --color \
+        | sed "s/^/${HLON} M${HLOFF}/; \$d" || true
+    git -C "${repo}" status --short --ignored=no "$@" \
+        | grep -Fv -f <( git -C "${repo}" diff --name-only || true ) || true
 }
 
 function git-status-summary { # dir [flags]
@@ -53,17 +57,23 @@ function git-status-summary { # dir [flags]
 }
 
 function projects-dir {
-    find ~ \
-         -maxdepth 1 \
-         -type d \
-         \( -iname 'Projects' \
-         -o -iname 'Project' \
-         -o -iname 'Proj' \
-         -o -iname 'Development' \
-         -o -iname 'Develop' \
-         -o -iname 'Devel' \
-         \) -print \
-        | head -1
+    local PROJ=${XDG_PROJECTS_DIR:-${HOME}/Projects}
+    if [[ -d ${PROJ} ]]; then
+	echo "${PROJ}"
+    else
+	find ~ \
+             -maxdepth 1 \
+             -type d \
+             \( -iname 'Projects' \
+             -o -iname 'Project' \
+             -o -iname 'Proj' \
+             -o -iname 'Development' \
+             -o -iname 'Develop' \
+             -o -iname 'Devel' \
+	     -o -iname 'Dev' \
+             \) -print \
+            | head -1
+    fi
 }
 
 cd "$( projects-dir )"
