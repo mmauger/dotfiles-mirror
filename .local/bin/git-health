@@ -1,0 +1,119 @@
+#! /usr/bin/env bash
+set -eu -o pipefail
+
+PROG="$( basename "$0" )"
+# shellcheck disable=SC2034 # PDIR not used (remove if actually used)
+PDIR="$( cd "$( dirname "$0" )" && pwd )"
+
+# ========================================
+# Set the defaults for options
+
+# ========================================
+# Array. OPT, OPT: (reqd arg), OPT? (opt arg)
+SHORT_OPTIONS=(  )
+LONG_OPTIONS=(  )
+
+# ========================================
+# Usage help text
+function opt_usage {
+    cat >&2 << TAC
+usage: ${PROG}
+
+Display health of current git repository.
+TAC
+    exit 2
+}
+
+OPT_SHORT=$( IFS='';  : "${SHORT_OPTIONS[*]}"; : "${_//\?/::}"; : "${_}h";           echo "${_}" )
+OPT_LONG=$(  IFS=','; : "${LONG_OPTIONS[*]}";  : "${_//\?/::}"; : "${_}${_:+,}help"; echo "${_}" )
+
+OPTIONS=$( getopt --alternative \
+                  --name "${PROG}" \
+                  --options "${OPT_SHORT}" \
+                  --longoptions "${OPT_LONG}" \
+                  -- "$@" )
+eval set -- "${OPTIONS}"
+
+# ========================================
+# Handle command line options
+while true; do
+    case ${1} in
+        (-h | --help)   opt_usage ;;
+        (--)            shift; break ;;
+        (*)
+            echo >&2 "${PROG}: unrecognized option -- \"-${OPT}\""
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# ========================================
+# Parse the command line parameters
+PROOT=${XDG_PROJECTS_DIR:-${HOME}/Projects}
+if (( $# == 0 )); then
+    if [[ -d .git ]]; then
+	REPO=$( dirs +0 )
+        GIT='git '
+ 
+    else
+        echo >2 "${PROG}: This is not a GIT repository."
+	exit 1
+    fi
+
+elif (( $# == 1 )); then
+    if [[ -d $1 && -d $1/.git ]]; then
+        REPO="$( cd "$1" && pwd )"
+        GIT="git -C ${REPO} "
+
+    elif [[ -d ${PROOT}/$1 && -d ${PROOT}/$1/.git ]]; then
+        REPO="$( cd "${PROOT}/$1" && pwd )"
+        GIT="git -C ${REPO} "
+
+    else
+        echo >2 "${PROG}: GIT repository \"$1\" does not exist."
+	exit 2
+    fi
+
+else
+    echo >2 "${PROG}: parameters not accepted --" "$@"
+    exit 3
+fi
+
+# ========================================
+# Display details about the repo
+echo 'GIT Repository:' "$( cd ${REPO} && dirs +0 )"
+echo
+echo '===[ Most modified files (past year) ]==='
+${GIT} log --format='' --name-only --since="1 year ago" | sort | uniq -c | sort -nr | head -20 || true
+echo
+echo '===[ Who is merging (lifetime; limit 20) ]==='
+${GIT} shortlog -sn --no-merges | head --lines 20 || true
+echo '---[ Versus (past 6mos; limit 20) ]---'
+${GIT} shortlog -sn --no-merges --since="6 months ago" | head --lines 20 || true
+echo
+echo '===[ Files with FIX|BUG|BROKEN (limit 20) ]==='
+${GIT} log -i -E --grep="fix|bug|broken" --name-only --format='' | sort | uniq -c | sort -nr | head --lines 20 || true
+echo
+echo '===[ Commits per month (past 3yrs) ]==='
+T=$( mktemp --tmpdir "${PROG}.XXXXXXXXXX" ); trap "rm -f $T" EXIT
+${GIT} log --format='%ad' --date=format:'%Y-%m' | sort -r | uniq -c > $T
+MAXX=$( awk 'BEGIN { MAXX=0 } { if ($1 > MAXX) { MAXX=$1; } } END { print(MAXX); }' $T )
+awk -v "MAXX=${MAXX}" -v "COLUMNS=${COLUMNS}" \
+    'NR == 1 {
+       FIRST_MONTH=$2
+       LAST_MONTH=sprintf("%04d%s", strtonum(substr(FIRST_MONTH, 1, 4)) - 3, substr(FIRST_MONTH, 5))
+       printf ">> FIRST=%s LAST=%s\n", FIRST_MONTH, LAST_MONTH
+     }
+     $2 > LAST_MONTH {
+       WIDTH=int($1 * (COLUMNS - 20) / MAXX)
+       bar = sprintf("%-*s", WIDTH, "")
+       gsub(" ", "=", bar)
+       printf("%s %s\n", $0, bar)
+     }' $T || true
+echo
+echo '===[ Commits with REVERT|HOTFIX|EMERGENCY|ROLLBACK (past year; limit 20) ]==='
+${GIT} log --oneline --since="1 year ago" | grep -iE 'revert|hotfix|emergency|rollback' | head --lines 20 || true
+echo
+
+#
