@@ -1,4 +1,5 @@
 # .bash_profile
+if [ -f /etc/profile ]; then source /etc/profile; fi
 
 MY_LOCATION=home
 export MY_LOCATION
@@ -32,6 +33,61 @@ function location-config { # config-path printf-include
 }
 
 location-config ~/.ssh/config 'Include %s'
+
+# add flatpak commands so that elisp (executable-find) will succeed
+function flatpak-wrapper { # dir
+    local DIR=$1
+    local APP CMD FIL LIN VER
+    local -a APP_LIST=()
+    local APPS=''
+    local WRAP=' FLATPAK EXEC WRAPPER '
+    if command -v flatpak &> /dev/null; then
+        APPS=$( flatpak list --app --columns=application | sed 1d )
+        mapfile -t APP_LIST <<< "${APPS}"
+    fi
+
+    # Remove unneeded wrappers
+    while read -r -d $'\0' FIL; do
+        if [[ ${FIL} != *~ ]]; then
+            LIN=$( grep --regexp "^#${WRAP}" "${FIL}" )
+            APP=$( cut --delimiter ' ' --fields 5 <<< "${LIN}" )
+            VER=$( cut --delimiter ' ' --fields 6 <<< "${LIN}" )
+            if [[ ${VER} != ${FLATPAK_WRAPPER_VERSION} ]] \
+                   || ! grep --quiet --fixed-strings --line-regexp --regexp "${APP}" <<< "${APPS}"; then
+                mv --force "${FIL}" "${FIL}~"
+            fi
+        fi
+    done < <( find "${DIR}" \
+                   -mindepth 1 \
+                   -maxdepth 1 \
+                   -type f \
+                   -executable \
+                   -exec grep --regexp "^#${WRAP}" --files-with-matches --null {} \;
+         )
+
+    # Create new wrappers
+    for APP in "${APP_LIST[@]}"; do
+        : "${APP##*.}"
+        CMD=${_,,}
+        FIL="${DIR}/${CMD}"
+        if [[ ! -f ${FIL} ]]; then
+            cat > "${FIL}" <<EOF
+#! /usr/bin/env sh
+#${WRAP} ${APP} ${FLATPAK_WRAPPER_VERSION}
+
+DISPLAY=\${DISPLAY:-':0'}; export DISPLAY
+GNOME_SETUP_DISPLAY=\${GNOME_SETUP_DISPLAY:-':1'}; export GNOME_SETUP_DISPLAY
+WAYLAND_DISPLAY=\${WAYLAND_DISPLAY:-'wayland-0'}; export WAYLAND_DISPLAY
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/${UID}/bus; export DBUS_SESSION_BUS_ADDRESS
+flatpak run ${APP} "\$@" > "${TMPDIR:=/tmp}/${CMD}.log" 2>&1 &
+EOF
+            chmod +x "${FIL}"
+        fi
+    done
+}
+FLATPAK_WRAPPER_VERSION=$( type flatpak-wrapper | md5sum | cut -d ' ' -f 1 )
+
+# flatpak-wrapper ~/.local/bin
 
 # Get the aliases and functions
 if [[ -f ~/.bashrc ]]; then
