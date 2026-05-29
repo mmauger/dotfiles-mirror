@@ -44,7 +44,7 @@ emacsclient --eval "(${_EVAL})"
 
 # check modified file
 if grep --extended-regexp '^(<<<<<<<|=======|>>>>>>>|####### Ancestor)' "${_MERGED}"; then
-    _TMPnAME=$( basename "${_MERGED}" )
+    _TMPNAM=$( basename "${_MERGED}" )
     _MERGEDSAVE=$( mktemp --dry-run --tmpdir "${PWD}" "${_TMPNAM}.XXXXXXXXXX" )
     cp "${_MERGED}" "${_MERGEDSAVE}"
     echo 1>&2 "${PROG}: Oops! Conflict markers detected in \"${_MERGED}\"."
